@@ -1,0 +1,42 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-m);
+  inline-size: var(--shell);
+  margin-inline: auto;
+  padding-block: var(--space-m);
+}
+
+.wordmark {
+  font-family: var(--font-mono-stack);
+  font-size: var(--step--1);
+  letter-spacing: 0.02em;
+  color: var(--slate);
+}
+
+.main {
+  inline-size: var(--shell);
+  margin-inline: auto;
+}
+
+.hero {
+  padding-block: var(--space-2xl) var(--space-3xl);
+}
+
+.headline {
+  font-size: var(--step-4);
+  font-weight: 800;
+  max-inline-size: 18ch;
+}
+
+.subline {
+  margin-block-start: var(--space-l);
+  max-inline-size: var(--measure);
+  color: var(--slate);
+  font-size: var(--step-1);
+  line-height: 1.5;
+}

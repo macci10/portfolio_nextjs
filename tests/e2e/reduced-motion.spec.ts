@@ -1,4 +1,15 @@
 import { expect, test } from "@playwright/test";
+import { PALETTES } from "../../src/lib/palettes";
+
+/** Palette hex -> the `rgb(r, g, b)` form getComputedStyle returns. */
+function hexToRgb(hex: string): string {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
+}
+
+// Derived, not transcribed — a palette retune must not leave this file behind
+// failing with an opaque rgb mismatch.
+const [MID_A, MID_B] = PALETTES.dark[2]!;
 
 /**
  * Plan section 4: under `prefers-reduced-motion: reduce` the aurora drift stops,
@@ -20,9 +31,9 @@ test.describe("reduced motion", () => {
 
   test("freezes the aurora — no running animation", async ({ page }) => {
     await page.goto("/");
+    // Enumerates the whole document, not just the aurora — a stray running
+    // animation anywhere is also a reduced-motion failure.
     const running = await page.evaluate(() => {
-      const el = document.querySelector('[aria-hidden="true"] > div');
-      if (!el) return "no-aurora-element";
       return document
         .getAnimations()
         .filter((a) => a.playState === "running")
@@ -35,8 +46,7 @@ test.describe("reduced motion", () => {
   test.describe("with a fixed dark theme", () => {
     test.use({ colorScheme: "dark" });
 
-    // PALETTES.dark[2] === ["#101C38", "#261232"]
-    const MIDPOINT = { a: "rgb(16, 28, 56)", b: "rgb(38, 18, 50)" };
+    const MIDPOINT = { a: hexToRgb(MID_A), b: hexToRgb(MID_B) };
 
     test("paints the midpoint stop and holds it across scroll", async ({ page }) => {
       await page.goto("/");
@@ -65,14 +75,18 @@ test.describe("reduced motion", () => {
     });
     await page.goto("/");
     await page.evaluate(() => window.scrollTo(0, 400));
-    await page.waitForTimeout(300);
 
-    // React and next-themes may schedule a few frames; a running driver would
-    // be one per frame for the whole 300ms, i.e. well into the dozens.
-    const count = await page.evaluate(
-      () => (window as unknown as { __rafCount: number }).__rafCount,
-    );
-    expect(count).toBeLessThan(10);
+    // Measure a delta over a settled window rather than a total from load.
+    // Startup frames from React and next-themes are excluded, so a running
+    // driver (~18 frames per 300ms at 60fps) is unambiguous.
+    await page.waitForTimeout(300);
+    const read = () =>
+      page.evaluate(() => (window as unknown as { __rafCount: number }).__rafCount);
+    const first = await read();
+    await page.waitForTimeout(300);
+    const second = await read();
+
+    expect(second - first, `${first} -> ${second} frames`).toBeLessThan(3);
   });
 
   test("the theme toggle still works", async ({ page }) => {
@@ -81,5 +95,71 @@ test.describe("reduced motion", () => {
     const before = await html.getAttribute("data-theme");
     await page.getByRole("button", { name: "Dark theme" }).click();
     await expect(html).not.toHaveAttribute("data-theme", before ?? "");
+  });
+});
+
+/**
+ * Reduced motion is a preference users toggle mid-session. On the native CSS
+ * path the media query handles that for free. On the rAF path it does not:
+ * the driver writes INLINE custom properties, which outrank the stylesheet's
+ * reduced-motion block, so without a listener the loop keeps overriding it.
+ */
+test.describe("runtime preference changes on the rAF path", () => {
+  test.use({ colorScheme: "dark" });
+
+  const MIDPOINT_A = hexToRgb(MID_A);
+
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      const original = CSS.supports.bind(CSS);
+      CSS.supports = ((...args: string[]) =>
+        args.join(" ").includes("animation-timeline")
+          ? false
+          : original(...(args as [string]))) as typeof CSS.supports;
+    });
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await page.addStyleTag({
+      content: "body::after{content:'';display:block;height:400vh} :root{animation:none !important}",
+    });
+  });
+
+  test("stands down and hands the gradient back to CSS when reduce is enabled", async ({
+    page,
+  }) => {
+    await page.evaluate(() => window.scrollTo(0, 2000));
+    // The driver is live and has written an inline oklch value.
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.style.getPropertyValue("--bg-a")))
+      .toMatch(/^oklch\(/);
+
+    await page.emulateMedia({ reducedMotion: "reduce" });
+
+    // It must clear its inline write so the stylesheet's midpoint applies again.
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          getComputedStyle(document.documentElement).getPropertyValue("--bg-a").trim(),
+        ),
+      )
+      .toBe(MIDPOINT_A);
+  });
+
+  test("starts driving again when reduce is turned back off", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          getComputedStyle(document.documentElement).getPropertyValue("--bg-a").trim(),
+        ),
+      )
+      .toBe(MIDPOINT_A);
+
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.evaluate(() => window.scrollTo(0, 2000));
+
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.style.getPropertyValue("--bg-a")))
+      .toMatch(/^oklch\(/);
   });
 });

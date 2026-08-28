@@ -69,9 +69,13 @@ export function oklchToCss({ l, c, h }: Oklch): string {
 export function lerpOklch(a: Oklch, b: Oklch, t: number): Oklch {
   const k = clamp01(t);
 
-  // Shortest signed hue delta, in (-180, 180].
-  const delta = (((b.h - a.h + 540) % 360) - 180 + 360) % 360;
-  const signed = delta > 180 ? delta - 360 : delta;
+  // Shortest signed hue delta, in (-180, 180]. The double modulo tolerates
+  // hues outside [0, 360) on either input.
+  //
+  // Exact antipodes are a genuine tie — both arcs are equally short — and the
+  // half-open range resolves them counter-clockwise, deterministically:
+  // lerp(0 -> 180, 0.5) is 90, lerp(180 -> 0, 0.5) is 270.
+  const signed = ((((b.h - a.h) % 360) + 540) % 360) - 180;
 
   return {
     l: a.l + (b.l - a.l) * k,

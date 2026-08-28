@@ -1,5 +1,15 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+
+// Resolved from the vitest root (vitest.config.ts sits at the project root, so
+// cwd is pinned there). A `?raw` import would be tidier but Vitest stubs CSS
+// imports to an empty string, which fails silently and misleadingly.
+const CSS_PATH = resolve(process.cwd(), "src/app/globals.css");
+if (!existsSync(CSS_PATH)) {
+  throw new Error(`globals.css not found at ${CSS_PATH} — is the vitest root still the repo root?`);
+}
+const css = readFileSync(CSS_PATH, "utf8");
 import { PALETTES, SECTIONS } from "@/lib/palettes";
 
 /**
@@ -9,13 +19,27 @@ import { PALETTES, SECTIONS } from "@/lib/palettes";
  * palettes.ts and forgets the stylesheet, the two rendering paths silently
  * disagree and only some browsers show the drift as intended.
  */
-const css = readFileSync("src/app/globals.css", "utf8");
 
 function keyframeStops(name: string): string[][] {
-  const block = new RegExp(`@keyframes ${name}\\s*\\{([\\s\\S]*?)\\n\\}`).exec(css);
-  if (!block?.[1]) throw new Error(`No @keyframes ${name} in globals.css`);
+  const open = css.indexOf(`@keyframes ${name}`);
+  if (open === -1) throw new Error(`No @keyframes ${name} in globals.css`);
+  // Brace-match rather than assuming the closing brace is at column 0, which
+  // any reformat would break with a misleading "not found" error.
+  let depth = 0;
+  let end = open;
+  for (let i = css.indexOf("{", open); i < css.length; i += 1) {
+    if (css[i] === "{") depth += 1;
+    else if (css[i] === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        end = i;
+        break;
+      }
+    }
+  }
+  const body = css.slice(open, end);
 
-  return [...block[1].matchAll(/--bg-a:\s*(#[0-9a-f]{6});\s*--bg-b:\s*(#[0-9a-f]{6})/gi)].map(
+  return [...body.matchAll(/--bg-a:\s*(#[0-9a-f]{6});\s*--bg-b:\s*(#[0-9a-f]{6})/gi)].map(
     (m) => [m[1]!.toLowerCase(), m[2]!.toLowerCase()],
   );
 }
@@ -80,5 +104,21 @@ describe("reduced-motion stop", () => {
       midpoint[0].toLowerCase(),
       midpoint[1].toLowerCase(),
     ]);
+  });
+});
+
+describe("keyframe spacing", () => {
+  // The length check above catches a missing stop, but nothing verifies the
+  // percentages get redistributed — a 7th section must respace 0..100, not
+  // append a stop the timeline never reaches.
+  it.each(["bg-drift-dark", "bg-drift-light"])("spaces %s evenly across 0-100%%", (name) => {
+    const open = css.indexOf(`@keyframes ${name}`);
+    const body = css.slice(open, css.indexOf("}\n", css.indexOf("100%", open)));
+    const percents = [...body.matchAll(/^\s*(\d+)%\s*\{/gm)].map((m) => Number(m[1]));
+
+    expect(percents).toHaveLength(SECTIONS.length);
+
+    const step = 100 / (SECTIONS.length - 1);
+    expect(percents).toEqual(SECTIONS.map((_, i) => Math.round(i * step)));
   });
 });

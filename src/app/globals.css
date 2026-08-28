@@ -108,10 +108,12 @@ body {
   font-size: var(--step-0);
   line-height: 1.6;
   color: var(--ink);
-  /* The Backdrop element paints the gradient. This is the fallback ground so
-     the page is never transparent before it mounts. */
-  background: linear-gradient(160deg, var(--bg-a), var(--bg-b));
-  background-attachment: fixed;
+  /* Flat colour only. The Backdrop element paints the real gradient on a fixed
+     layer; repeating it here as a fixed-attachment background would force the
+     page onto main-thread scrolling and repaint every frame, which is exactly
+     what the phase's "no paint during scroll" target rules out. This is just
+     the ground colour behind everything. */
+  background-color: var(--bg-a);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -241,8 +243,13 @@ a {
    The plan calls for the midpoint stop (index 2) rendered statically. Doing it
    here rather than from JS matters: the token defaults above are stop 0, so a
    JS write would repaint stop 0 -> stop 2 after hydration, which is a visible
-   flash. CSS owns it, so the correct colour is present on first paint and a
-   runtime change to the OS preference is picked up with no listener.
+   flash. CSS owns it, so the correct colour is present on first paint.
+
+   This block only wins while nothing has written the properties inline —
+   inline custom properties outrank author rules. Backdrop.tsx therefore
+   REMOVES its inline values when it stands down, and tracks the preference
+   with a matchMedia listener so a runtime toggle is honoured on the JS path
+   too. Do not assume CSS alone is sufficient here.
    Stops mirror PALETTES[theme][2] — asserted in tests/unit/backdrop-css.test.ts.
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {

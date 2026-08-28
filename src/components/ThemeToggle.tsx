@@ -1,10 +1,65 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { useTheme } from "next-themes";
 import styles from "./ThemeToggle.module.css";
 
 const THEME_COLOR = { dark: "#0d1128", light: "#e8ebf3" } as const;
+
+const WIPE_MS = 480;
+
+type ViewTransitionLike = { ready: Promise<void> };
+
+/**
+ * The site's signature moment: a circular reveal of the incoming theme,
+ * expanding from the toggle's own coordinates rather than from a screen edge.
+ *
+ * Falls back to an instant swap wherever View Transitions are unavailable, and
+ * is skipped entirely under reduced motion. Plan section 5 spends the visual
+ * boldness here, which is why everything else on the page stays quiet.
+ */
+function wipe(button: HTMLElement, apply: () => void) {
+  const start = document.startViewTransition?.bind(document);
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (!start || reduced) {
+    apply();
+    return;
+  }
+
+  const rect = button.getBoundingClientRect();
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height / 2;
+
+  // Published so the stylesheet can position the pseudo-elements, and so the
+  // origin is inspectable rather than trapped in a closure.
+  const root = document.documentElement;
+  root.style.setProperty("--wipe-x", `${x}px`);
+  root.style.setProperty("--wipe-y", `${y}px`);
+
+  // Radius to the furthest corner, so the circle always clears the viewport.
+  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+
+  const transition = start(() => {
+    // The DOM must be updated synchronously inside the callback, or the
+    // transition captures the old state twice and nothing appears to change.
+    flushSync(apply);
+  }) as ViewTransitionLike;
+
+  void transition.ready.then(() => {
+    root.animate(
+      {
+        clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`],
+      },
+      {
+        duration: WIPE_MS,
+        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+        pseudoElement: "::view-transition-new(root)",
+      },
+    );
+  });
+}
 
 function SunIcon() {
   return (
@@ -36,6 +91,7 @@ function MoonIcon() {
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -56,10 +112,11 @@ export function ThemeToggle() {
 
   return (
     <button
+      ref={buttonRef}
       type="button"
       className={styles.toggle}
       aria-pressed={isDark}
-      onClick={() => setTheme(isDark ? "light" : "dark")}
+      onClick={(event) => wipe(event.currentTarget, () => setTheme(isDark ? "light" : "dark"))}
     >
       <span className="sr-only">Dark theme</span>
       {isDark ? <MoonIcon /> : <SunIcon />}

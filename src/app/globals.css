@@ -263,3 +263,49 @@ a {
     --bg-b: #f3e8f1;
   }
 }
+
+/* ==========================================================================
+   Theme wipe
+   The default view-transition cross-fade is replaced by a circular clip of the
+   INCOMING theme, expanding from the toggle's coordinates (--wipe-x/--wipe-y,
+   set in ThemeToggle.tsx). The outgoing snapshot simply sits still underneath.
+   ========================================================================== */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Belt-and-braces: ThemeToggle already skips the transition, but if one is
+     ever started elsewhere it must not animate. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* ==========================================================================
+   Reduced motion: entrance states
+   Motion skips its animations under `reduce` but leaves the `initial` state
+   applied as an inline style, which strands every revealed section at
+   opacity 0 — a blank page for exactly the users who cannot opt back in.
+   The components also guard with useReducedMotion; this is the guarantee,
+   because inline styles are what has to be beaten here.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-seq] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

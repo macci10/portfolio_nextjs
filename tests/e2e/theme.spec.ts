@@ -21,10 +21,18 @@ test.describe("theme", () => {
 
   test("persists the choice across reload", async ({ page }) => {
     await page.goto("/");
+    const html = page.locator("html");
+    const before = await html.getAttribute("data-theme");
+
     await toggle(page).click();
-    const chosen = await page.locator("html").getAttribute("data-theme");
+    // The theme wipe applies the change inside a view-transition callback, so
+    // the swap is asynchronous. Wait for it before capturing what was chosen —
+    // reading synchronously here captures the pre-click value.
+    await expect(html).not.toHaveAttribute("data-theme", before ?? "");
+    const chosen = await html.getAttribute("data-theme");
+
     await page.reload();
-    await expect(page.locator("html")).toHaveAttribute("data-theme", chosen ?? "");
+    await expect(html).toHaveAttribute("data-theme", chosen ?? "");
   });
 
   test.describe("honours the OS preference on first visit", () => {

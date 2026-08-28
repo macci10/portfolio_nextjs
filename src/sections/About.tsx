@@ -1,9 +1,10 @@
 import { ABOUT, STATS } from "@/data/site";
 import styles from "./sections.module.css";
+import { Reveal } from "@/components/Reveal";
 
 export function About() {
   return (
-    <section id="about" aria-labelledby="about-heading" className={styles.section}>
+    <Reveal id="about" labelledBy="about-heading" className={styles.section}>
       <p className={styles.eyebrow}>About</p>
       <h2 id="about-heading" className={styles.heading}>
         Eleven years at one agency, which is six-plus engagements in practice.
@@ -23,6 +24,6 @@ export function About() {
           </li>
         ))}
       </ul>
-    </section>
+    </Reveal>
   );
 }

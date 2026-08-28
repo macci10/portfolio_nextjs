@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Backdrop } from "@/components/Backdrop";
 import { SkipLink } from "@/components/SkipLink";
+import { MotionProvider } from "@/components/MotionProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { body, display, mono } from "./fonts";
 import { SITE } from "@/data/site";
@@ -24,9 +25,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={`${display.variable} ${body.variable} ${mono.variable}`}>
         <ThemeProvider>
-          <SkipLink />
-          <Backdrop />
-          {children}
+          <MotionProvider>
+            <SkipLink />
+            <Backdrop />
+            {children}
+          </MotionProvider>
         </ThemeProvider>
       </body>
     </html>

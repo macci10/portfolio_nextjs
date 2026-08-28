@@ -1,9 +1,10 @@
 import { CONTACT, SITE } from "@/data/site";
 import styles from "./sections.module.css";
+import { Reveal } from "@/components/Reveal";
 
 export function Contact() {
   return (
-    <section id="contact" aria-labelledby="contact-heading" className={styles.section}>
+    <Reveal id="contact" labelledBy="contact-heading" className={styles.section}>
       <p className={styles.eyebrow}>Contact</p>
       <h2 id="contact-heading" className={styles.heading}>
         {CONTACT.heading}
@@ -32,6 +33,6 @@ export function Contact() {
         <br />
         {SITE.timezoneNote}
       </p>
-    </section>
+    </Reveal>
   );
 }

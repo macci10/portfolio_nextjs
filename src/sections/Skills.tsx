@@ -1,9 +1,10 @@
 import { SKILL_GROUPS } from "@/data/skills";
 import styles from "./sections.module.css";
+import { Reveal } from "@/components/Reveal";
 
 export function Skills() {
   return (
-    <section id="skills" aria-labelledby="skills-heading" className={styles.section}>
+    <Reveal id="skills" labelledBy="skills-heading" className={styles.section}>
       <p className={styles.eyebrow}>Skills</p>
       <h2 id="skills-heading" className={styles.heading}>
         What I actually use, and would answer questions about.
@@ -21,6 +22,6 @@ export function Skills() {
           </div>
         ))}
       </div>
-    </section>
+    </Reveal>
   );
 }

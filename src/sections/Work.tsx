@@ -1,4 +1,5 @@
 import { ProjectCard } from "@/components/ProjectCard";
+import { Reveal } from "@/components/Reveal";
 import { PROJECTS } from "@/data/projects";
 import sections from "./sections.module.css";
 import styles from "./Work.module.css";
@@ -8,7 +9,7 @@ export function Work() {
   const rest = PROJECTS.filter((p) => !p.featured).sort((a, b) => a.order - b.order);
 
   return (
-    <section id="work" aria-labelledby="work-heading" className={sections.section}>
+    <Reveal id="work" labelledBy="work-heading" className={sections.section}>
       <p className={sections.eyebrow}>Work</p>
       <h2 id="work-heading" className={sections.heading}>
         Six of these are the ones worth asking about.
@@ -32,6 +33,6 @@ export function Work() {
           <ProjectCard key={project.slug} project={project} compact />
         ))}
       </div>
-    </section>
+    </Reveal>
   );
 }

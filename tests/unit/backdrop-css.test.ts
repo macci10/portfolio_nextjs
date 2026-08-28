@@ -85,10 +85,16 @@ describe("native path wiring", () => {
 describe("reduced-motion stop", () => {
   // globals.css pins the midpoint stop in CSS so it is correct on first paint.
   // That hardcodes two more colours away from palettes.ts, so guard them too.
+  // There are several reduced-motion blocks in globals.css now, so locate the
+  // one that actually pins the gradient rather than relying on its position.
   const block = (() => {
-    const start = css.lastIndexOf("@media (prefers-reduced-motion: reduce)");
-    expect(start, "reduced-motion stop block not found").toBeGreaterThan(-1);
-    return css.slice(start);
+    const chunks = css.split("@media (prefers-reduced-motion: reduce)").slice(1);
+    // Match the declaration shape, not just the token name: the first chunk
+    // runs to the next media query and sweeps up the keyframes, which mention
+    // --bg-a without pinning it.
+    const match = chunks.find((c) => /\[data-theme="dark"\]\s*\{\s*--bg-a/.test(c));
+    expect(match, "no reduced-motion block pins --bg-a per theme").toBeDefined();
+    return match!;
   })();
 
   it.each(["dark", "light"] as const)("pins %s to PALETTES[theme][2]", (theme) => {

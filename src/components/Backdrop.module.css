@@ -14,8 +14,6 @@
 .aurora {
   position: absolute;
   inset: -20%;
-  filter: blur(60px);
-  will-change: transform;
 }
 
 .aurora::before,
@@ -25,6 +23,12 @@
   width: 60vmax;
   height: 60vmax;
   border-radius: 50%;
+  /* Blur and the compositing hint sit on the animated elements themselves.
+     On the parent, an ancestor filter over continuously moving children
+     forces a filter re-render every frame instead of a GPU-composited
+     transform. */
+  filter: blur(60px);
+  will-change: transform;
 }
 
 .aurora::before {

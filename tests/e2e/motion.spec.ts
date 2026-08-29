@@ -106,6 +106,39 @@ test.describe("scroll reveals", () => {
     await expect.poll(() => contact.evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
   });
 
+  // NOTE: this passes under the previous viewport config too, so it is a floor
+  // rather than a regression guard for that change. It asserts the reveal is
+  // not triggered by a section merely clipping the viewport edge, which is the
+  // behaviour worth keeping whatever the trigger values are.
+  test("does not fire while the section is only clipping the viewport bottom", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    // Park #contact so its top edge sits just inside the bottom of the viewport.
+    await page.evaluate(() => {
+      const el = document.querySelector("#contact")!;
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo(0, top - window.innerHeight + 24);
+    });
+    await page.waitForTimeout(400);
+
+    const clipping = await page
+      .locator("#contact")
+      .evaluate((el) => getComputedStyle(el).opacity);
+    expect(Number(clipping), "reveal fired too early").toBeLessThan(1);
+
+    // Bring it properly into view; now it must reveal.
+    await page.evaluate(() => {
+      const el = document.querySelector("#contact")!;
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo(0, top - window.innerHeight * 0.45);
+    });
+    await expect
+      .poll(() => page.locator("#contact").evaluate((el) => getComputedStyle(el).opacity))
+      .toBe("1");
+  });
+
   test("reveals only once — scrolling away does not re-hide", async ({ page }) => {
     await page.goto("/");
     const contact = page.locator("#contact");

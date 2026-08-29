@@ -40,3 +40,6 @@ next-env.d.ts
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Source screenshots, staged into public/media/ per project
+/screens

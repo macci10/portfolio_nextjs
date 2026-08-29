@@ -1,24 +1,27 @@
 import Link from "next/link";
-import type { Project } from "@/data/projects";
+import type { ProjectFrontmatter } from "@/lib/schema";
 import styles from "./ProjectCard.module.css";
 
 type Props = {
-  project: Project;
+  project: ProjectFrontmatter;
   compact?: boolean;
-  /**
-   * Only passed once /work/[slug] exists (phase 4). A project without a detail
-   * page must not render a "read more" affordance, so the absence of this prop
-   * is what keeps the card link-free rather than a disabled-looking control.
-   */
-  detailHref?: string;
 };
 
-export function ProjectCard({ project, compact = false, detailHref }: Props) {
-  const heading = detailHref ? (
-    <Link href={detailHref}>{project.name}</Link>
+export function ProjectCard({ project, compact = false }: Props) {
+  // A project without a detail page must not render a "read more" affordance,
+  // so the absence of a route is what keeps the card link-free rather than a
+  // disabled-looking control.
+  const heading = project.detailPage ? (
+    <Link href={`/work/${project.slug}`}>{project.name}</Link>
   ) : (
     project.name
   );
+
+  const { appStore, playStore } = project.links;
+  // Explicit boolean: `a ?? b ? … : …` parses correctly but reads as a
+  // precedence bug, and `??` would hide a valid Play Store link behind an
+  // empty-string App Store one.
+  const hasStoreLink = Boolean(appStore || playStore);
 
   return (
     <article className={`${styles.card} ${compact ? styles.compact : ""}`}>
@@ -36,18 +39,18 @@ export function ProjectCard({ project, compact = false, detailHref }: Props) {
         ))}
       </ul>
 
-      {(project.links?.appStore ?? project.links?.playStore) ? (
+      {hasStoreLink ? (
         <ul className={styles.stores}>
-          {project.links?.appStore ? (
+          {appStore ? (
             <li>
-              <a href={project.links.appStore} rel="noreferrer" target="_blank">
+              <a href={appStore} rel="noreferrer" target="_blank">
                 App Store
               </a>
             </li>
           ) : null}
-          {project.links?.playStore ? (
+          {playStore ? (
             <li>
-              <a href={project.links.playStore} rel="noreferrer" target="_blank">
+              <a href={playStore} rel="noreferrer" target="_blank">
                 Play Store
               </a>
             </li>

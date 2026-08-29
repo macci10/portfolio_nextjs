@@ -1,0 +1,25 @@
+---
+slug: ptpal-ble
+name: PTPal — BLE wearable integration
+role: Android Developer
+period: Earlier engagement
+category: Connected hardware · Native Android
+platforms: [Android]
+featured: true
+detailPage: false
+order: 6
+tags:
+  - Android
+  - Java
+  - BLE
+  - GATT
+  - Local database buffering
+  - Background sync
+summary: >-
+  Fixed critical BLE connectivity failures with FitMi Puck wearable devices in a
+  physical therapy app.
+highlights:
+  - Built a strict sequential queue for all BLE hardware communication, removing the concurrency failures the stack couldn't handle on its own.
+  - Introduced a local database buffer between device and cloud — readings written locally first, synced in the background.
+  - Result — an ultra-stable connection that eliminated virtually all FitMi reading loss under unstable network conditions.
+---

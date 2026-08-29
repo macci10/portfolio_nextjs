@@ -147,6 +147,49 @@ test.describe("hero load sequence", () => {
       .toBe("1");
   });
 
+  test("the sequence actually runs rather than resting at its end state", async ({ page }) => {
+    // Opacity 1 is also what an animation that never applied would report, so
+    // asserting the settled state proves nothing on its own.
+    await page.goto("/");
+    const running = await page.evaluate(() =>
+      [...document.querySelectorAll("#hero [data-seq]")]
+        .flatMap((el) => el.getAnimations())
+        .map((a) => (a.effect as KeyframeEffect | null)?.getKeyframes?.().length ?? 0),
+    );
+    expect(running.length, "no CSS animation is attached to the hero sequence")
+      .toBeGreaterThan(2);
+  });
+
+  test("the headline animates transform only, never opacity", async ({ page }) => {
+    // This is the LCP element. An element at opacity 0 is not painted, so
+    // fading it moves the 2.4s render delay this fix removed straight back in —
+    // and nothing else in the suite would notice.
+    await page.goto("/");
+    const props = await page.locator("#hero-heading").evaluate((el) =>
+      el
+        .getAnimations()
+        .flatMap((a) => (a.effect as KeyframeEffect | null)?.getKeyframes?.() ?? [])
+        .flatMap((frame) => Object.keys(frame)),
+    );
+
+    expect(props.length, "the headline has no entrance animation at all").toBeGreaterThan(0);
+    expect(props).not.toContain("opacity");
+    expect(props).toContain("transform");
+  });
+
+  test("elements after the headline do fade in", async ({ page }) => {
+    await page.goto("/");
+    const props = await page.locator("#hero .heroMeta, #hero [data-seq]:not(#hero-heading)")
+      .first()
+      .evaluate((el) =>
+        el
+          .getAnimations()
+          .flatMap((a) => (a.effect as KeyframeEffect | null)?.getKeyframes?.() ?? [])
+          .flatMap((frame) => Object.keys(frame)),
+      );
+    expect(props).toContain("opacity");
+  });
+
   test.describe("under reduced motion", () => {
     test.use({ contextOptions: { reducedMotion: "reduce" } });
 
@@ -156,6 +199,18 @@ test.describe("hero load sequence", () => {
         .locator("#hero-heading")
         .evaluate((el) => getComputedStyle(el).opacity);
       expect(Number(opacity)).toBe(1);
+    });
+
+    test("runs no animation at all", async ({ page }) => {
+      // The sequence is CSS now, so `transform: none` alone would lose to a
+      // running animation on every frame — `animation: none` is what wins.
+      await page.goto("/");
+      const count = await page.evaluate(
+        () =>
+          [...document.querySelectorAll("#hero [data-seq]")].flatMap((el) => el.getAnimations())
+            .length,
+      );
+      expect(count).toBe(0);
     });
   });
 });

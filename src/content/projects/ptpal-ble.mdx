@@ -18,10 +18,6 @@ tags:
 summary: >-
   Fixed critical BLE connectivity failures with FitMi Puck wearable devices in a
   physical therapy app.
-description: >-
-  Neither side of the problem can be trusted: Android's BLE stack cannot
-  reliably manage itself under real-world conditions, and field networks are not
-  stable either. So a queue and a buffer went in the way of both.
 highlights:
   - Built a strict sequential queue for all BLE hardware communication, removing the concurrency failures the stack couldn't handle on its own.
   - Introduced a local database buffer between device and cloud — readings written locally first, synced in the background.

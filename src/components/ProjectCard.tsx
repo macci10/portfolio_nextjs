@@ -18,6 +18,10 @@ export function ProjectCard({ project, compact = false }: Props) {
   );
 
   const { appStore, playStore } = project.links;
+  // Explicit boolean: `a ?? b ? … : …` parses correctly but reads as a
+  // precedence bug, and `??` would hide a valid Play Store link behind an
+  // empty-string App Store one.
+  const hasStoreLink = Boolean(appStore || playStore);
 
   return (
     <article className={`${styles.card} ${compact ? styles.compact : ""}`}>
@@ -35,7 +39,7 @@ export function ProjectCard({ project, compact = false }: Props) {
         ))}
       </ul>
 
-      {appStore ?? playStore ? (
+      {hasStoreLink ? (
         <ul className={styles.stores}>
           {appStore ? (
             <li>

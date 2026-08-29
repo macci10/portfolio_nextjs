@@ -60,6 +60,11 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
   if (!project?.frontmatter.detailPage) notFound();
 
   const { frontmatter, body } = project;
+  const { appStore, playStore } = frontmatter.links;
+  // Explicit boolean rather than `a ?? b ? … : …`: that parses correctly
+  // but reads as a precedence bug, and `??` would hide a valid Play Store
+  // link behind an empty-string App Store one.
+  const hasStoreLink = Boolean(appStore || playStore);
 
   return (
     <>
@@ -94,18 +99,18 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
               </div>
             </dl>
 
-            {frontmatter.links.appStore ?? frontmatter.links.playStore ? (
+            {hasStoreLink ? (
               <ul className={styles.stores}>
-                {frontmatter.links.appStore ? (
+                {appStore ? (
                   <li>
-                    <a href={frontmatter.links.appStore} rel="noreferrer" target="_blank">
+                    <a href={appStore} rel="noreferrer" target="_blank">
                       App Store
                     </a>
                   </li>
                 ) : null}
-                {frontmatter.links.playStore ? (
+                {playStore ? (
                   <li>
-                    <a href={frontmatter.links.playStore} rel="noreferrer" target="_blank">
+                    <a href={playStore} rel="noreferrer" target="_blank">
                       Play Store
                     </a>
                   </li>

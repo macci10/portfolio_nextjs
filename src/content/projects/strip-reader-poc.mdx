@@ -20,9 +20,6 @@ tags:
 summary: >-
   Automated reading of pool chemical test strips from a phone camera, targeting
   under ±0.2 pH accuracy.
-description: >-
-  A proof of concept for reading colorimetric test strips reliably under
-  uncontrolled lighting.
 highlights:
   - Native Android Kotlin modules via react-native-vision-camera for bitmap cropping, Laplacian variance blur checks, and raw RGB extraction.
   - "Two-stage pipeline: detection (capture validation, guide-aware coordinate mapping, ROI localisation), then interpretation (calibration, sRGB→CIELAB conversion, colour comparison, interpolation)."
@@ -35,15 +32,18 @@ media:
     alt: Capture screen with an on-screen guide the strip is aligned inside before the shutter unlocks
     width: 460
     height: 996
+    placeholder: true
     caption: The guide is what makes ROI localisation tractable.
   - src: /media/strip-reader-poc/02.jpg
     alt: Per-pad readout listing each measured parameter against its interpolated value
     width: 460
     height: 996
+    placeholder: true
   - src: /media/strip-reader-poc/03.jpg
     alt: Result detail showing the matched reference swatch beside the sampled pad colour
     width: 460
     height: 996
+    placeholder: true
 ---
 
 A proof of concept for reading colorimetric test strips reliably under
@@ -52,9 +52,9 @@ the phone camera never gives you the colour that's actually there.
 
 Auto white balance, auto exposure, the colour temperature of whatever light the
 user happens to be standing under, and the phone's own tone curve all sit
-between the pad and the pixel. Two photos of the same strip taken a metre apart
-disagree. So the pipeline has to treat the captured RGB as a corrupted signal
-and recover the reading from it, rather than trusting it.
+between the pad and the pixel. Two photos of the same strip under different
+light disagree. So the pipeline has to treat the captured RGB as a corrupted
+signal and recover the reading from it, rather than trusting it.
 
 The work splits in two. **Detection** validates the capture (a Laplacian
 variance blur check rejects a shot that isn't sharp enough to sample), maps
@@ -64,8 +64,8 @@ compares against reference swatches, and interpolates between them.
 
 Two decisions carried most of the accuracy. The first was moving from CIE76 to
 **CIEDE2000** for colour distance — CIE76 is a plain Euclidean distance in
-CIELAB and it systematically misjudges the blue and yellow regions the pH and
-alkalinity pads live in. The second was **per-pad local white balance**: the
+CIELAB, and treating that space as perceptually uniform is exactly the
+assumption that breaks in its saturated regions. The second was **per-pad local white balance**: the
 strip has white gutters printed between the pads, so each pad gets its own Von
 Kries channel scaling derived from the white immediately next to it, rather than
 one global correction for the whole photo. Specular highlights — pixels above

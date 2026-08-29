@@ -20,9 +20,6 @@ tags:
 summary: >-
   A kids' interactive coloring app with a custom drawing engine, cloud-delivered
   content packs, and a kid-safe monetisation layer.
-description: >-
-  An internal Maxxsol product taken end to end, from architecture through iOS
-  and Android release.
 highlights:
   - "Drawing engine: queue-based flood fill, SVG textured brush strokes, multi-touch pinch-to-zoom to 5x via InteractiveViewer, and a Magic Rainbow dynamic colour mode."
   - Hive-backed pixel-buffer persistence with auto-save and resume across sessions.
@@ -34,15 +31,18 @@ media:
     alt: Pack browser showing downloadable coloring sets laid out as large tap targets
     width: 460
     height: 996
+    placeholder: true
     caption: Packs are fetched as zip archives and unpacked on device.
   - src: /media/maxkids-coloring-world/02.jpg
     alt: Canvas with the line-art loaded, colour palette along the edge and brush controls
     width: 460
     height: 996
+    placeholder: true
   - src: /media/maxkids-coloring-world/03.jpg
     alt: Parental gate posing an arithmetic question before export and share are unlocked
     width: 460
     height: 996
+    placeholder: true
 ---
 
 An internal Maxxsol product taken end to end, from architecture through iOS and
@@ -55,8 +55,7 @@ tablet-sized canvas either blows the stack or drops frames long enough that a
 four-year-old taps again and fills the wrong region. The engine uses a
 queue-based fill instead, which keeps the work bounded and the frame budget
 intact. On top of it sit SVG textured brush strokes, pinch-to-zoom to 5x
-through `InteractiveViewer`, and a Magic Rainbow mode that shifts colour as the
-stroke travels.
+through `InteractiveViewer`, and a Magic Rainbow dynamic colour mode.
 
 Children do not finish drawings in one sitting, so the pixel buffer is persisted
 to Hive with auto-save, and a session resumes exactly where it stopped.

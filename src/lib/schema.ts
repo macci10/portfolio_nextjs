@@ -18,7 +18,6 @@ export const ProjectSchema = z.object({
   order: z.number(),
   tags: z.array(z.string()).min(1),
   summary: z.string(),
-  description: z.string().optional(),
   highlights: z.array(z.string()).default([]),
   links: z
     .object({
@@ -33,6 +32,13 @@ export const ProjectSchema = z.object({
         src: z.string(),
         // Long enough that it must describe the screen, not name the file.
         alt: z.string().min(15),
+        /**
+         * A stand-in until the real capture is gathered. The file does not show
+         * what `alt` describes, so the gallery must say so rather than read a
+         * fabricated description to anyone using a screen reader. Flip this off
+         * (or drop it) when the real image replaces the file at the same path.
+         */
+        placeholder: z.boolean().default(false),
         width: z.number().int().positive(),
         height: z.number().int().positive(),
         caption: z.string().optional(),

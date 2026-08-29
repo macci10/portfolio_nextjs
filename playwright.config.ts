@@ -5,6 +5,9 @@ const baseURL = `http://127.0.0.1:${PORT}`;
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  // Aliases `server-only` to a stub; the root tsconfig must not, because that
+  // would disable the guard in the app build too.
+  tsconfig: "./tests/tsconfig.json",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

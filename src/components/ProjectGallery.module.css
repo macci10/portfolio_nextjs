@@ -15,6 +15,12 @@
   scrollbar-width: thin;
 }
 
+.list:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 4px;
+  border-radius: var(--radius);
+}
+
 .list > li {
   flex: none;
   scroll-snap-align: start;
@@ -35,6 +41,7 @@
 /* A light-mode app screenshot on a dark backdrop needs a defined surface, or a
    transparent or white-edged PNG haloes against the gradient. */
 .frame {
+  position: relative;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--card);
@@ -53,4 +60,19 @@
   font-size: var(--step--1);
   line-height: 1.4;
   color: var(--slate);
+}
+
+.badge {
+  position: absolute;
+  inset-block-start: var(--space-xs);
+  inset-inline-start: var(--space-xs);
+  padding: 0.25em 0.6em;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--bg-a) 82%, transparent);
+  border: 1px solid var(--line);
+  font-family: var(--font-mono-stack);
+  font-size: var(--step--1);
+  line-height: 1.4;
+  color: var(--ink);
+  backdrop-filter: blur(6px);
 }

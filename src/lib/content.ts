@@ -1,3 +1,6 @@
+// Turns an accidental client import into a clear build error rather than a
+// confusing bundler failure about `node:fs`.
+import "server-only";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import matter from "gray-matter";

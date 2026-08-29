@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["../src/*"],
+      // Playwright's loader does not set the `react-server` resolve condition,
+      // so the real module throws on import. See tests/stubs/server-only.ts.
+      "server-only": ["./stubs/server-only.ts"]
+    }
+  }
+}

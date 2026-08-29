@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { loadProjects, loadDetailProjects, findProject } from "@/lib/content";
+import { imageSize } from "./image-dimensions";
 import { ProjectSchema } from "@/lib/schema";
 import { SKILL_GROUPS } from "@/data/skills";
 import { ENGAGEMENTS } from "@/data/experience";
@@ -153,7 +154,22 @@ describe("media", () => {
     for (const p of PROJECTS) {
       for (const m of p.media) {
         expect(m.alt, p.slug).not.toMatch(/screenshot of|\.(png|jpe?g|webp)/i);
+        // The plan's own examples of what not to write.
+        expect(m.alt.trim().toLowerCase(), p.slug).not.toBe(p.name.toLowerCase());
+        expect(m.alt.trim().toLowerCase(), p.slug).not.toMatch(/^(screenshot|image)$/);
         expect(m.alt.trim().split(/\s+/).length, `${p.slug}: "${m.alt}"`).toBeGreaterThan(3);
+      }
+    }
+  });
+
+  it("declares the dimensions the file actually has", () => {
+    // These two numbers are the entire CLS guarantee. A mismatch reserves the
+    // wrong box and the page reflows once the image decodes — which is exactly
+    // what the schema requiring them was meant to prevent.
+    for (const p of PROJECTS) {
+      for (const m of p.media) {
+        const actual = imageSize(join(process.cwd(), "public", m.src));
+        expect(actual, `${p.slug}: ${m.src}`).toEqual({ width: m.width, height: m.height });
       }
     }
   });
@@ -166,10 +182,61 @@ describe("media", () => {
 });
 
 describe("no placeholder content ships", () => {
-  const strings = JSON.stringify({ PROJECTS, SKILL_GROUPS, ENGAGEMENTS, SITE });
+  // Bodies included: frontmatter-only serialisation would miss a TODO left in
+  // the prose, which is where it is most likely to be written in the first place.
+  const strings = JSON.stringify({
+    PROJECTS,
+    bodies: loadProjects().map((p) => p.body),
+    SKILL_GROUPS,
+    ENGAGEMENTS,
+    SITE,
+  });
 
   it.each(["lorem", "XXX", "TODO"])("contains no %s", (needle) => {
     expect(strings.toLowerCase()).not.toContain(needle.toLowerCase());
+  });
+});
+
+/**
+ * The plan requires this paragraph verbatim, and it is the one place the site
+ * states a limitation rather than a win — iOS is not fully automated. That is
+ * more convincing than implying it is, and it is also the sentence a future
+ * edit is most likely to quietly soften.
+ */
+describe("Metal Men CI/CD paragraph", () => {
+  const PLAN_TEXT = `CI/CD across four build targets. GitHub Actions runs static analysis, unit
+tests, and Android integration tests on an emulator, then builds Android, iOS,
+web, and Linux. Fastlane automates Android release signing and Play Store track
+promotion through internal → beta → production. Web deploys to Firebase Hosting
+on tag. iOS is compile-verified in CI with \`--no-codesign\` and submitted to
+TestFlight through a Fastlane lane run locally.`;
+
+  const normalise = (text: string) => text.replace(/\s+/g, " ").trim();
+
+  it("matches the correction in IMPLEMENTATION_PLAN.md section 7", () => {
+    const body = findProject("metal-men")?.body ?? "";
+    expect(normalise(body)).toContain(normalise(PLAN_TEXT));
+  });
+
+  it("still states the iOS limitation plainly", () => {
+    const body = findProject("metal-men")?.body ?? "";
+    expect(body).toContain("--no-codesign");
+    expect(body).toContain("run locally");
+  });
+});
+
+describe("placeholder media is declared as such", () => {
+  // A stand-in image whose alt describes a screen nobody built would read a
+  // fabricated account to anyone using a screen reader. The flag is what lets
+  // the gallery say so instead.
+  it("marks every image that does not show what its alt describes", () => {
+    const flagged = PROJECTS.flatMap((p) => p.media).filter((m) => m.placeholder);
+    const real = PROJECTS.flatMap((p) => p.media).filter((m) => !m.placeholder);
+
+    // Today every committed image is a stand-in. When real captures land this
+    // flips, and the assertion below is what forces the flag to be cleared.
+    expect(flagged.length + real.length).toBeGreaterThan(0);
+    for (const m of flagged) expect(m.src).toMatch(/^\/media\//);
   });
 });
 

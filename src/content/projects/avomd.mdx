@@ -1,0 +1,73 @@
+---
+slug: avomd
+name: AvoMD
+role: Mobile Team Lead (3 engineers)
+period: Jun 2020 – Aug 2023
+category: Health tech · React Native
+platforms: [iOS, Android]
+featured: true
+detailPage: true
+order: 2
+tags:
+  - React Native
+  - TypeScript
+  - Expo SDK
+  - Redux
+  - Firebase
+  - Cloud Functions
+  - AWS S3
+summary: >-
+  Clinical decision support, in production at Mass General Brigham, VCU Health,
+  Geisinger, and Children's Minnesota. 10,000+ downloads.
+description: >-
+  I led the mobile team of three engineers and owned architecture, code review,
+  and the release cadence across the full lifecycle.
+highlights:
+  - Led the migration to TypeScript and functional React Hooks under clean architecture principles — production crash rate down 40%, feature delivery time down 50%.
+  - Architected three distinct app variants (main app, Columbia Psych, Preoperative Eval) shipping from a single codebase using Xcode build configurations and Android Studio flavors, removing the need for separate codebases.
+  - Built a Firebase and Google Sheets automation pipeline for user account provisioning — HTTP-triggered Cloud Functions performing bulk writes into the Realtime Database via the Admin SDK, with clients updating live.
+  - Maintained continuous Expo SDK and React Native version upgrades across three years of app lifecycle.
+  - Ran code reviews, documented architectural decisions, and mentored the team.
+links:
+  appStore: https://apps.apple.com/us/app/avomd/id1114334146
+  playStore: https://play.google.com/store/apps/details?id=com.avomd.client
+media:
+  - src: /media/avomd/01.jpg
+    alt: Clinical module list with a progress ring showing how much of the care pathway is complete
+    width: 460
+    height: 996
+    caption: The module list is the first screen after sign-in.
+  - src: /media/avomd/02.jpg
+    alt: Structured question step with tap targets sized for a clinician working one-handed
+    width: 460
+    height: 996
+  - src: /media/avomd/03.jpg
+    alt: Summary view collecting the answers given and the guidance they resolve to
+    width: 460
+    height: 996
+---
+
+I led the mobile team of three engineers and owned architecture, code review,
+and the release cadence across the full lifecycle. The app puts clinical
+guidance in front of doctors at the point of care, which sets the reliability
+bar: a runtime error isn't a bad user experience, it's a clinician seeing the
+wrong guidance.
+
+That bar is what drove the TypeScript migration. A three-year-old React Native
+codebase written in JavaScript accumulates a lot of implicit shape assumptions,
+and the ones that survive to production are exactly the ones that only break on
+unusual data. Moving to TypeScript and functional Hooks under clean
+architecture principles cut the production crash rate by 40% and roughly halved
+feature delivery time.
+
+The variant work is the piece I'd point at in an interview. AvoMD needed to ship
+as three distinct apps — the main product, Columbia Psych, and Preoperative Eval
+— each with its own identity and content set. The obvious answer is three
+codebases, and the obvious answer would have tripled the maintenance. Xcode
+build configurations and Android Studio flavors gave all three from one
+codebase instead.
+
+Provisioning was the least glamorous and most useful thing I built: an
+HTTP-triggered Cloud Function that read a Google Sheet and performed bulk
+writes into the Firebase Realtime Database through the Admin SDK. Clients
+updated live. It replaced an onboarding process that had been manual.

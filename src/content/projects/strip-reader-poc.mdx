@@ -1,0 +1,76 @@
+---
+slug: strip-reader-poc
+name: Strip Reader
+role: Individual contributor
+period: "2025"
+category: Computer vision · React Native + native Kotlin
+platforms: [Android]
+featured: true
+detailPage: true
+order: 3
+tags:
+  - React Native
+  - TypeScript
+  - Kotlin
+  - Vision Camera
+  - Native Modules
+  - CIEDE2000
+  - CIELAB
+  - Jest
+summary: >-
+  Automated reading of pool chemical test strips from a phone camera, targeting
+  under ±0.2 pH accuracy.
+description: >-
+  A proof of concept for reading colorimetric test strips reliably under
+  uncontrolled lighting.
+highlights:
+  - Native Android Kotlin modules via react-native-vision-camera for bitmap cropping, Laplacian variance blur checks, and raw RGB extraction.
+  - "Two-stage pipeline: detection (capture validation, guide-aware coordinate mapping, ROI localisation), then interpretation (calibration, sRGB→CIELAB conversion, colour comparison, interpolation)."
+  - CIEDE2000 perceptual colour distance in CIELAB space, upgraded from CIE76.
+  - Von Kries channel scaling for per-pad local white balance against the strip's own white gutters.
+  - Specular highlight filtering, skipping pixels above 240 luminance.
+  - Extensible across strip layouts — AquaChek 4-parameter and 7-parameter configurations.
+media:
+  - src: /media/strip-reader-poc/01.jpg
+    alt: Capture screen with an on-screen guide the strip is aligned inside before the shutter unlocks
+    width: 460
+    height: 996
+    caption: The guide is what makes ROI localisation tractable.
+  - src: /media/strip-reader-poc/02.jpg
+    alt: Per-pad readout listing each measured parameter against its interpolated value
+    width: 460
+    height: 996
+  - src: /media/strip-reader-poc/03.jpg
+    alt: Result detail showing the matched reference swatch beside the sampled pad colour
+    width: 460
+    height: 996
+---
+
+A proof of concept for reading colorimetric test strips reliably under
+uncontrolled lighting. The interesting problem isn't reading colour — it's that
+the phone camera never gives you the colour that's actually there.
+
+Auto white balance, auto exposure, the colour temperature of whatever light the
+user happens to be standing under, and the phone's own tone curve all sit
+between the pad and the pixel. Two photos of the same strip taken a metre apart
+disagree. So the pipeline has to treat the captured RGB as a corrupted signal
+and recover the reading from it, rather than trusting it.
+
+The work splits in two. **Detection** validates the capture (a Laplacian
+variance blur check rejects a shot that isn't sharp enough to sample), maps
+screen coordinates through the on-screen guide, and localises each pad's region
+of interest. **Interpretation** then calibrates, converts sRGB to CIELAB,
+compares against reference swatches, and interpolates between them.
+
+Two decisions carried most of the accuracy. The first was moving from CIE76 to
+**CIEDE2000** for colour distance — CIE76 is a plain Euclidean distance in
+CIELAB and it systematically misjudges the blue and yellow regions the pH and
+alkalinity pads live in. The second was **per-pad local white balance**: the
+strip has white gutters printed between the pads, so each pad gets its own Von
+Kries channel scaling derived from the white immediately next to it, rather than
+one global correction for the whole photo. Specular highlights — pixels above
+240 luminance, usually a reflection off the wet strip — are dropped before
+sampling.
+
+The strip layout is configuration, not code, so the same pipeline reads the
+AquaChek 4-parameter and 7-parameter strips.

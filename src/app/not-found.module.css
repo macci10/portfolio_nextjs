@@ -1,0 +1,45 @@
+.main {
+  inline-size: var(--shell);
+  margin-inline: auto;
+  padding-block: var(--space-3xl);
+  min-block-size: 60vh;
+}
+
+.code {
+  font-family: var(--font-mono-stack);
+  font-size: var(--step--1);
+  letter-spacing: 0.14em;
+  color: var(--signal);
+}
+
+.title {
+  margin-block-start: var(--space-m);
+  font-size: var(--step-4);
+  font-weight: 800;
+  max-inline-size: 14ch;
+}
+
+.body {
+  margin-block-start: var(--space-m);
+  max-inline-size: var(--measure);
+  font-size: var(--step-1);
+  line-height: 1.5;
+  color: var(--slate);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  margin-block-start: var(--space-xl);
+  padding: 0.75em 1.4em;
+  border-radius: var(--radius);
+  background: var(--signal);
+  color: var(--bg-a);
+  font-weight: 500;
+  text-decoration: none;
+  transition: transform 180ms var(--ease-out);
+}
+
+.cta:hover {
+  transform: translateY(-2px);
+}

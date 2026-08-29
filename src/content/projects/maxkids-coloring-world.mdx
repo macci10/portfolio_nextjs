@@ -1,0 +1,73 @@
+---
+slug: maxkids-coloring-world
+name: "MaxKids: Coloring World"
+role: Senior Flutter Developer
+period: Jan 2025 – Present
+category: Consumer / kids · Flutter
+platforms: [iOS, Android]
+featured: true
+detailPage: true
+order: 4
+tags:
+  - Flutter
+  - Dart
+  - Provider
+  - Hive
+  - Firebase Storage
+  - Google Mobile Ads
+  - flutter_svg
+  - Python
+summary: >-
+  A kids' interactive coloring app with a custom drawing engine, cloud-delivered
+  content packs, and a kid-safe monetisation layer.
+description: >-
+  An internal Maxxsol product taken end to end, from architecture through iOS
+  and Android release.
+highlights:
+  - "Drawing engine: queue-based flood fill, SVG textured brush strokes, multi-touch pinch-to-zoom to 5x via InteractiveViewer, and a Magic Rainbow dynamic colour mode."
+  - Hive-backed pixel-buffer persistence with auto-save and resume across sessions.
+  - Firebase Storage content pipeline that fetches zip-archived coloring packs, unpacks them locally, and auto-patches SVGs to normalise vector rendering dimensions across devices.
+  - Google Mobile Ads (banner, interstitial, rewarded) behind a kid-safe arithmetic parental gate protecting gallery export, share sheets, and PDF printing.
+  - Standalone Python asset toolkit (svg_optimizer, png_to_svg, trim_asset, find_svg_bbox) to trace, scale, and normalise line-art assets.
+media:
+  - src: /media/maxkids-coloring-world/01.jpg
+    alt: Pack browser showing downloadable coloring sets laid out as large tap targets
+    width: 460
+    height: 996
+    caption: Packs are fetched as zip archives and unpacked on device.
+  - src: /media/maxkids-coloring-world/02.jpg
+    alt: Canvas with the line-art loaded, colour palette along the edge and brush controls
+    width: 460
+    height: 996
+  - src: /media/maxkids-coloring-world/03.jpg
+    alt: Parental gate posing an arithmetic question before export and share are unlocked
+    width: 460
+    height: 996
+---
+
+An internal Maxxsol product taken end to end, from architecture through iOS and
+Android release, working alongside a junior developer. The drawing engine is the
+product — everything else exists to keep it fed with content and to keep the
+monetisation from getting in a child's way.
+
+Flood fill is where a coloring app is won or lost. A naive recursive fill on a
+tablet-sized canvas either blows the stack or drops frames long enough that a
+four-year-old taps again and fills the wrong region. The engine uses a
+queue-based fill instead, which keeps the work bounded and the frame budget
+intact. On top of it sit SVG textured brush strokes, pinch-to-zoom to 5x
+through `InteractiveViewer`, and a Magic Rainbow mode that shifts colour as the
+stroke travels.
+
+Children do not finish drawings in one sitting, so the pixel buffer is persisted
+to Hive with auto-save, and a session resumes exactly where it stopped.
+
+The content pipeline pulls zip-archived packs from Firebase Storage and unpacks
+them locally. The awkward part was vector dimensions: SVGs authored at different
+canvas sizes render at different scales across devices, so the pipeline
+auto-patches them on ingest to normalise rendering. A standalone Python toolkit
+(`svg_optimizer`, `png_to_svg`, `trim_asset`, `find_svg_bbox`) does the tracing,
+scaling, and bounding-box normalisation before art ever reaches a pack.
+
+Monetisation is banner, interstitial, and rewarded ads — but export, share, and
+PDF printing all sit behind an arithmetic parental gate. Anything that sends an
+image off the device is a decision an adult should make.

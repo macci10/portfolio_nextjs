@@ -1,0 +1,65 @@
+---
+slug: drone-inspection-controller
+name: Drone Inspection Controller
+role: Android Developer · DJI Specialist
+period: Dec 2023 – Apr 2025
+category: Drone / UAV · Native Android
+platforms: [Android]
+featured: true
+detailPage: true
+order: 1
+tags:
+  - Kotlin
+  - DJI MSDK
+  - DJI OSDK
+  - MOP Protocol
+  - MediaCodec
+  - SurfaceView
+  - Google Maps API
+  - Coroutines
+  - WorkManager
+summary: >-
+  A remote controller app for autonomous building-envelope drone inspections,
+  delivered to Georgia Tech, the U.S. Department of Energy, Oak Ridge National
+  Laboratory, and New Mexico Tech.
+description: >-
+  Native Android, Kotlin. The controller drives autonomous inspection missions
+  and renders everything the operator sees during the flight — live camera
+  feeds, telemetry, mission progress, and a real-time LiDAR view.
+highlights:
+  - Custom real-time LiDAR point cloud visualiser — low-level frame reader, assembler, and MediaCodec encoder rendering onto a SurfaceView.
+  - MOP Protocol implementation for synchronised communication between DJI's Mobile SDK and Onboard SDK, running multiple concurrent real-time data pipelines.
+  - Multi-camera mode system with switchable IR, RGB, and zoom feeds, plus a live drone-to-POV distance overlay rendered on the active camera.
+  - Google Maps extended well beyond ClusterManager — custom waypoint and marker handling, mission path rendering, and inspection progress tracking.
+  - Restyled DJI's built-in SDK UI components to match the client design system.
+whatIdImprove: >-
+  I'd move frame assembly off the JNI boundary; marshalling between Kotlin and
+  native buffers cost latency at higher frame rates, and today I'd keep buffers
+  native with direct `ByteBuffer` allocation. I'd also add adaptive frame
+  dropping — my implementation buffered and played catch-up when the link
+  degraded, briefly showing operators stale data. A live inspection tool should
+  always prioritise the newest frame.
+# No media. The Joulea NDA is resolved for the client name and the end users
+# only; code, screenshots, and architecture diagrams stay out.
+media: []
+---
+
+Native Android, Kotlin. The controller drives autonomous inspection missions and
+renders everything the operator sees during the flight — live camera feeds,
+telemetry, mission progress, and a real-time LiDAR view.
+
+The hardest part was the media pipeline. LiDAR frames arrived from the drone's
+onboard computer over MOP Protocol as fragmented packets. I built the frame
+reader consuming the packet stream, an assembler reconstructing complete frames,
+and an encoder feeding MediaCodec to render onto a SurfaceView in real time.
+
+I also owned connection reliability — sequencing MOP channel communication so
+the pipeline never deadlocked when the radio link degraded mid-mission. On a
+building envelope inspection the operator is standing in a parking lot watching
+a drone work a facade eight storeys up; a stalled feed is not a cosmetic
+problem, it is the moment they lose the ability to judge whether the mission is
+still safe.
+
+Google Maps carried the mission planning side. The stock `ClusterManager` gets
+you markers on a map and very little else, so waypoint handling, mission path
+rendering, and inspection progress tracking were all custom on top of it.

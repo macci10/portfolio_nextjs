@@ -1,0 +1,56 @@
+.gallery {
+  margin-block-start: var(--space-2xl);
+}
+
+.list {
+  display: flex;
+  gap: var(--space-m);
+  margin: 0;
+  padding: 0 0 var(--space-s);
+  list-style: none;
+  /* Screenshots are tall. Side-by-side with a scroll rail keeps the page from
+     becoming a column of phone-shaped holes. */
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+}
+
+.list > li {
+  flex: none;
+  scroll-snap-align: start;
+}
+
+.portrait {
+  inline-size: clamp(11rem, 60vw, 15rem);
+}
+
+.landscape {
+  inline-size: clamp(17rem, 82vw, 30rem);
+}
+
+.figure {
+  margin: 0;
+}
+
+/* A light-mode app screenshot on a dark backdrop needs a defined surface, or a
+   transparent or white-edged PNG haloes against the gradient. */
+.frame {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  overflow: hidden;
+  line-height: 0;
+}
+
+.image {
+  inline-size: 100%;
+  block-size: auto;
+}
+
+.caption {
+  margin-block-start: var(--space-s);
+  font-family: var(--font-mono-stack);
+  font-size: var(--step--1);
+  line-height: 1.4;
+  color: var(--slate);
+}

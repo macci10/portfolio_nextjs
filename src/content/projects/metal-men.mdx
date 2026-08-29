@@ -1,0 +1,71 @@
+---
+slug: metal-men
+name: Metal Men
+role: Flutter Developer
+period: Dec 2024 – Present
+category: Real-time messaging · Flutter
+platforms: [iOS, Android]
+featured: true
+detailPage: true
+order: 5
+tags:
+  - Flutter
+  - Dart
+  - Matrix Protocol
+  - Hive
+  - Firebase
+  - GitHub Actions
+  - Fastlane
+summary: >-
+  A community messaging app on the Matrix Protocol, built by customising the
+  open-source FluffyChat framework and keeping it upgradable.
+description: >-
+  Forking an actively developed open-source client is easy; staying on it isn't.
+highlights:
+  - Real-time messaging and cross-device state synchronisation on the Matrix Protocol.
+  - Designed an upgrade pipeline to absorb continuous upstream changes — 7–8 production updates shipped, integration time per release down 70%.
+  - CI/CD across four build targets, with Fastlane driving Android release signing and Play Store track promotion.
+  - Shipped to both the App Store and Play Store.
+links:
+  appStore: https://apps.apple.com/us/app/metal-men-connect/id6504414768
+  playStore: https://play.google.com/store/apps/details?id=men.metal.connect
+media:
+  - src: /media/metal-men/01.jpg
+    alt: Room list with unread counts, the entry point into the community's channels
+    width: 460
+    height: 996
+    caption: Room state syncs across devices over Matrix.
+  - src: /media/metal-men/02.jpg
+    alt: Conversation view with the composer open and message history above it
+    width: 460
+    height: 996
+  - src: /media/metal-men/03.jpg
+    alt: Account settings listing the signed-in sessions and their verification state
+    width: 460
+    height: 996
+---
+
+Forking an actively developed open-source client is easy; staying on it isn't.
+The work that mattered here was the upgrade pipeline — a structured way to
+absorb continuous upstream FluffyChat changes without the fork drifting into
+something unmergeable.
+
+The failure mode is well known and slow: you customise the UI, upstream
+refactors the widget tree, your next merge is a hundred conflicts, you skip it,
+and six months later you are running a client that can no longer take security
+fixes. Avoiding that is mostly discipline about where customisation is allowed
+to live. Keeping the changes concentrated and boundary-shaped rather than
+sprayed through the tree is what took integration time per release down by
+around 70%, across 7–8 production updates.
+
+Underneath, it is Matrix: real-time messaging with cross-device state
+synchronisation, and Hive holding local state.
+
+## CI/CD
+
+CI/CD across four build targets. GitHub Actions runs static analysis, unit
+tests, and Android integration tests on an emulator, then builds Android, iOS,
+web, and Linux. Fastlane automates Android release signing and Play Store track
+promotion through internal → beta → production. Web deploys to Firebase Hosting
+on tag. iOS is compile-verified in CI with `--no-codesign` and submitted to
+TestFlight through a Fastlane lane run locally.

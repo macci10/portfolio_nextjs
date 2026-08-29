@@ -295,6 +295,50 @@ a {
 }
 
 /* ==========================================================================
+   Hero entrance sequence
+   CSS rather than Motion, deliberately. Under Motion the hero started at
+   opacity 0 and only appeared after hydration, which put the LCP element
+   behind the JavaScript bundle: Lighthouse measured 3.1s LCP, 85% of it
+   render delay. A CSS animation runs at first paint with no JS at all.
+
+   The headline animates transform only. A element at opacity 0 is not
+   painted, so fading the LCP candidate would move the delay out of
+   JavaScript and straight back into CSS.
+   ========================================================================== */
+[data-seq] {
+  --seq: 0;
+}
+
+[data-seq][data-seq-lcp] {
+  animation: seq-rise 0.55s var(--ease-out) both;
+}
+
+#hero [data-seq]:not([data-seq-lcp]) {
+  animation: seq-in 0.55s var(--ease-out) both;
+  animation-delay: calc(0.05s + var(--seq) * 0.08s);
+}
+
+@keyframes seq-rise {
+  from {
+    transform: translateY(14px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes seq-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ==========================================================================
    Reduced motion: entrance states
    Motion skips its animations under `reduce` but leaves the `initial` state
    applied as an inline style, which strands every revealed section at
@@ -307,5 +351,11 @@ a {
   [data-seq] {
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  /* The hero sequence is a CSS animation, so `transform: none` alone would be
+     overridden by the running animation on every frame. */
+  [data-seq] {
+    animation: none !important;
   }
 }

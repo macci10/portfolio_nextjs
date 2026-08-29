@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Source screenshots, staged into public/media/ per project
 /screens
+
+# Lighthouse CI run output
+/.lighthouseci

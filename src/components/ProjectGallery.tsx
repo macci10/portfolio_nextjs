@@ -24,13 +24,11 @@ export function ProjectGallery({ media, name }: Props) {
   return (
     <section className={styles.gallery}>
       {/* tabIndex on the scrolling element itself: without it a keyboard-only
-          user cannot reach anything past the first image (WCAG 2.1.1). */}
-      <ul
-        className={styles.list}
-        tabIndex={0}
-        role="group"
-        aria-label={`${name} screenshots`}
-      >
+          user cannot reach anything past the first image (WCAG 2.1.1).
+          Deliberately no role="group" — that overrides the implicit list role
+          and orphans the <li> children, which axe flags. A list can be named
+          and focused without changing what it is. */}
+      <ul className={styles.list} tabIndex={0} aria-label={`${name} screenshots`}>
         {media.map((shot, index) => (
           <li
             key={shot.src}

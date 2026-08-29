@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "bundle": "node scripts/bundle-report.mjs"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
@@ -25,7 +26,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.10.2",
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/eslintrc": "^3",
     "@playwright/test": "~1.62.1",
     "@testing-library/dom": "^10.4.1",

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
@@ -6,6 +7,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { WhatIdImprove } from "@/components/WhatIdImprove";
 import { findProject, loadDetailProjects } from "@/lib/content";
+import { SITE } from "@/data/site";
 import styles from "./page.module.css";
 
 type Params = { slug: string };
@@ -17,6 +19,35 @@ type Params = { slug: string };
  */
 export function generateStaticParams(): Params[] {
   return loadDetailProjects().map(({ frontmatter }) => ({ slug: frontmatter.slug }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const { slug } = await params;
+  const project = findProject(slug);
+
+  if (!project?.frontmatter.detailPage) return { title: "Not found" };
+
+  const { name, summary } = project.frontmatter;
+  const canonical = `/work/${slug}`;
+
+  return {
+    // Root layout supplies the "— Bilal Haider Makki" suffix via its template.
+    title: name,
+    description: summary,
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      title: `${name} — ${SITE.name}`,
+      description: summary,
+      url: canonical,
+      siteName: SITE.name,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${name} — ${SITE.name}`,
+      description: summary,
+    },
+  };
 }
 
 export default async function ProjectPage({ params }: { params: Promise<Params> }) {

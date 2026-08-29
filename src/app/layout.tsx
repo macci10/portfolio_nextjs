@@ -8,9 +8,45 @@ import { SITE } from "@/data/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  // Every relative URL below — canonicals, OG images — resolves against this.
   metadataBase: new URL(SITE.url),
-  title: SITE.metaTitle,
+  title: {
+    default: SITE.metaTitle,
+    template: `%s — ${SITE.name}`,
+  },
   description: SITE.metaDescription,
+  applicationName: SITE.name,
+  authors: [{ name: SITE.name, url: SITE.linkedin }],
+  creator: SITE.name,
+  keywords: [
+    "React Native",
+    "Flutter",
+    "Android",
+    "iOS",
+    "Kotlin",
+    "Swift",
+    "mobile engineer",
+    "mobile team lead",
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: SITE.name,
+    title: SITE.metaTitle,
+    description: SITE.ogBlurb,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE.metaTitle,
+    description: SITE.ogBlurb,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
 };
 
 export const viewport: Viewport = {

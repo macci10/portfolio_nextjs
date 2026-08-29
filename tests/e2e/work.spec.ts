@@ -79,7 +79,7 @@ test.describe("project detail pages", () => {
     // overflow-x with no focusable children is axe's scrollable-region-focusable
     // (WCAG 2.1.1): without a tabindex, images past the first are unreachable.
     await page.goto("/work/avomd");
-    const rail = page.getByRole("group", { name: /screenshots/i });
+    const rail = page.getByRole("list", { name: /screenshots/i });
     await expect(rail).toHaveAttribute("tabindex", "0");
     await rail.focus();
     await expect(rail).toBeFocused();
